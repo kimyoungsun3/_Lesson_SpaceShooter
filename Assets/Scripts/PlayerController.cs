@@ -10,10 +10,17 @@ public class PlayerController : MonoBehaviour {
 	public float moveSpeed = 10f;
 	public float tilt = 5f;
 
+	//발사...
+	public float NEXT_TIME = 0.25f;
+	float nextTime;
+	public Transform prefabBullet;
+	public Transform spawnPoint;
+
 	void Start(){
 		trans = transform;
 		y = trans.position.y;
 	}
+
 	void Update(){
 		//이동...
 		float h = Input.GetAxis("Horizontal");	//좌,우이동.
@@ -28,7 +35,15 @@ public class PlayerController : MonoBehaviour {
 		pos.z = Mathf.Clamp(pos.z, boundZ.x, boundZ.y);
 		trans.position = pos;
 
+		//발사하기.
+		if (Time.time > nextTime) {
+			nextTime = Time.time + NEXT_TIME;
+			Transform _t = Instantiate (prefabBullet, spawnPoint.position, spawnPoint.rotation) as Transform;
+			//_t.SetParent (trans);
+		}
+
 		//틸트 회전.
 		trans.rotation = Quaternion.Euler(0, 0, -h * tilt);
+
 	}
 }
