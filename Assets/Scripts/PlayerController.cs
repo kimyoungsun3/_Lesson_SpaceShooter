@@ -18,7 +18,9 @@ public class PlayerController : MonoBehaviour {
 
 	void Start(){
 		trans = transform;
+		#if DEBUG_XXX
 		y = trans.position.y;
+		#endif
 	}
 
 	void Update(){

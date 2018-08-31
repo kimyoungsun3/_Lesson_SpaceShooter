@@ -13,7 +13,9 @@ public class PlayerBullet : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		#if DEBUG_XXX
 		trans = transform;	
+		#endif
 	}
 	
 	// Update is called once per frame
