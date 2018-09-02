@@ -10,19 +10,21 @@ public class PlayerBullet : MonoBehaviour {
 	float distance;
 	public LayerMask mask;
 	public LayerMask boundaryMask;
+	public LayerMask enemyMask;
+	public LayerMask AsteroidMask;
+	public GameObject prefabExplosion;
 
 	// Use this for initialization
 	void Start () {
-		#if DEBUG_XXX
 		trans = transform;	
-		#endif
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		ray.origin = trans.position;
 		ray.direction = trans.forward;
-		distance = speed * Time.deltaTime;
+		distance = speed * Time.deltaTime + 0.1f;	//스킨값 추가...
+		Debug.DrawRay (ray.origin, ray.direction * distance, Color.blue);
 		if(Physics.Raycast(ray, out hit, distance, mask, QueryTriggerInteraction.Collide)){
 			HitCheck ();
 			return;
@@ -32,8 +34,24 @@ public class PlayerBullet : MonoBehaviour {
 	}
 
 	void HitCheck(){
-		if (hit.collider.gameObject.layer != Mathf.Log (boundaryMask.value, 2)) {
+		int _hitLayer = hit.collider.gameObject.layer;
+		//if (hit.collider.gameObject.layer != Mathf.Log (boundaryMask.value, 2)) {
+		if (CheckMask (_hitLayer, boundaryMask.value) > 0) {
 			//벽과 충돌(X)....> 파티클...
+			//Debug.Log ("경계와 충돌...");
+		} else if (CheckMask (_hitLayer, enemyMask.value) > 0) {
+			//Debug.Log ("적과 충돌...");
+			Enemy _scp = hit.collider.GetComponent<Enemy>();
+			if (_scp != null) {
+				_scp.HitDamage (1, hit.point);
+			}
+		} else if (CheckMask (_hitLayer, AsteroidMask.value) > 0) {
+			//Debug.Log ("행성과 충돌...");
+			//Instantiate(prefabExplosion, trans.position, trans.rotation);
+			Asteriod _scp = hit.collider.GetComponent<Asteriod>();
+			if (_scp != null) {
+				_scp.HitDamage (1, hit.point);
+			}
 		}
 		OnDestroy ();
 	}
@@ -41,4 +59,9 @@ public class PlayerBullet : MonoBehaviour {
 	void OnDestroy(){
 		Destroy (gameObject);
 	}
+
+	int CheckMask(int _layer, int _mask){
+		return ((int)Mathf.Pow (2, _layer) & _mask);
+	}
+
 }

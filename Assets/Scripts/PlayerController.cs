@@ -18,9 +18,8 @@ public class PlayerController : MonoBehaviour {
 
 	void Start(){
 		trans = transform;
-		#if DEBUG_XXX
 		y = trans.position.y;
-		#endif
+		health = HEALTH_MAX;
 	}
 
 	void Update(){
@@ -47,5 +46,29 @@ public class PlayerController : MonoBehaviour {
 		//틸트 회전.
 		trans.rotation = Quaternion.Euler(0, 0, -h * tilt);
 
+	}
+
+	public float HEALTH_MAX  = 10f;
+	float health;
+	bool bDie = false;
+	public GameObject prefabExplosion;
+	public void HitDamage(float _damage, Vector3 _hitPoint){
+		health -= _damage;
+		//Debug.Log ("#### hit particle, sound");
+
+		if (!bDie && health <= 0) {
+			Die ();
+		}
+	}
+
+	void Die(){
+		bDie = true;
+		//Debug.Log("#### die -> Particle");
+		Instantiate(prefabExplosion, trans.position, trans.rotation);
+		OnDestroy();
+	}
+
+	void OnDestroy(){
+		Destroy (gameObject);
 	}
 }
