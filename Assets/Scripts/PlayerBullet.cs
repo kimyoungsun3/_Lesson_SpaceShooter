@@ -18,11 +18,16 @@ public class PlayerBullet : MonoBehaviour {
 	void Start () {
 		trans = transform;	
 	}
+	float spawnTime;
+	public float SPAWN_ALIVE_TIME = 2f;
+	void OnEnable(){
+		spawnTime = Time.time + SPAWN_ALIVE_TIME;
+	}
 
 	// Update is called once per frame
 	void Update () {
-		ray.origin = trans.position;
-		ray.direction = trans.forward;
+		ray.origin 		= trans.position;
+		ray.direction 	= trans.forward;
 		distance = speed * Time.deltaTime + 0.1f;	//스킨값 추가...
 		Debug.DrawRay (ray.origin, ray.direction * distance, Color.blue);
 		if(Physics.Raycast(ray, out hit, distance, mask, QueryTriggerInteraction.Collide)){
@@ -31,6 +36,9 @@ public class PlayerBullet : MonoBehaviour {
 		}
 
 		trans.Translate (Vector3.forward * speed * Time.deltaTime);
+		if (Time.time > spawnTime) {
+			OnDestroy ();
+		}
 	}
 
 	void HitCheck(){
@@ -57,11 +65,13 @@ public class PlayerBullet : MonoBehaviour {
 	}
 
 	void OnDestroy(){
-		Destroy (gameObject);
+		//Destroy (gameObject);
+		gameObject.SetActive(false);
 	}
 
 	int CheckMask(int _layer, int _mask){
-		return ((int)Mathf.Pow (2, _layer) & _mask);
+		//return ((int)Mathf.Pow (2, _layer) & _mask);
+		return (2 << _layer) & _mask;
 	}
 
 }

@@ -22,7 +22,8 @@ public class PoolManager : MonoBehaviour {
 	public int poolCount = 20;
 	public bool willGrow = true;
 
-	public Dictionary<string, List<GameObject>> poolList = new Dictionary<string, List<GameObject>>();
+	//public Dictionary<string, List<GameObject>> poolList = new Dictionary<string, List<GameObject>>();
+	public Dictionary<int, List<GameObject>> poolList = new Dictionary<int, List<GameObject>>();
 	//public bool view = false;
 
 	void Awake(){
@@ -39,7 +40,7 @@ public class PoolManager : MonoBehaviour {
 		for (int j = 0; j < objList.Count; j++) {
 			_obj 	= objList [j];
 			_list 	= new List<GameObject> ();
-			poolList.Add(_obj.name, _list);
+			poolList.Add(_obj.name.GetHashCode(), _list);
 
 			for (int i = 0; i < poolCount; i++) {
 				_go = Instantiate (_obj) as GameObject;
@@ -59,14 +60,14 @@ public class PoolManager : MonoBehaviour {
 	}
 
 	public GameObject Instantiate(string _name){
-		if (!poolList.ContainsKey (_name)) {
+		if (!poolList.ContainsKey (_name.GetHashCode())) {
 			Debug.LogError ("Not found Pooling GameObject _name[" + _name + "]");
 			return null;
 		}
 		GameObject _rtn = null;
 		bool _find = false;
 
-		List<GameObject> _list = poolList [_name];
+		List<GameObject> _list = poolList [_name.GetHashCode()];
 		for (int i = 0; i < _list.Count; i++) {
 			if (!_list[i].activeInHierarchy) {
 				_rtn = _list[i];
