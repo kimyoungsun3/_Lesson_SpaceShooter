@@ -11,7 +11,7 @@ public class PlayerBullet2 : MonoBehaviour {
 
 	void OnTriggerEnter(Collider _col){
 		if (_col.CompareTag ("Boundary")) {
-			Destroy (gameObject);
+			gameObject.SetActive (false);
 		}
 	}
 }

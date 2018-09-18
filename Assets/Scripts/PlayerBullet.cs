@@ -11,8 +11,8 @@ public class PlayerBullet : MonoBehaviour {
 	public LayerMask mask;
 	public LayerMask boundaryMask;
 	public LayerMask enemyMask;
-	public LayerMask AsteroidMask;
-	public GameObject prefabExplosion;
+	public LayerMask asteroidMask;
+	//public GameObject prefabExplosion;
 
 	// Use this for initialization
 	void Start () {
@@ -43,19 +43,19 @@ public class PlayerBullet : MonoBehaviour {
 
 	void HitCheck(){
 		int _hitLayer = hit.collider.gameObject.layer;
-		//if (hit.collider.gameObject.layer != Mathf.Log (boundaryMask.value, 2)) {
 		if (CheckMask (_hitLayer, boundaryMask.value) > 0) {
 			//벽과 충돌(X)....> 파티클...
-			//Debug.Log ("경계와 충돌...");
+			Debug.Log ("Bullet 경계와 충돌...");
 		} else if (CheckMask (_hitLayer, enemyMask.value) > 0) {
-			//Debug.Log ("적과 충돌...");
+			Debug.Log ("Bullet 적과 충돌...");
 			Enemy _scp = hit.collider.GetComponent<Enemy>();
 			if (_scp != null) {
 				_scp.HitDamage (1, hit.point);
 			}
-		} else if (CheckMask (_hitLayer, AsteroidMask.value) > 0) {
-			//Debug.Log ("행성과 충돌...");
-			//Instantiate(prefabExplosion, trans.position, trans.rotation);
+			PoolManager.ins.Instantiate("explosion_hit", hit.point, Quaternion.identity);
+		} else if (CheckMask (_hitLayer, asteroidMask.value) > 0) {
+			Debug.Log ("Bullet 행성과 충돌...");
+			PoolManager.ins.Instantiate("explosion_hit", hit.point, Quaternion.identity);
 			Asteriod _scp = hit.collider.GetComponent<Asteriod>();
 			if (_scp != null) {
 				_scp.HitDamage (1, hit.point);
@@ -71,7 +71,22 @@ public class PlayerBullet : MonoBehaviour {
 
 	int CheckMask(int _layer, int _mask){
 		//return ((int)Mathf.Pow (2, _layer) & _mask);
-		return (2 << _layer) & _mask;
+		return ((2 << _layer - 1) & _mask);
 	}
 
+
+	/*
+
+	void HitCheck(){
+		int _hitLayer = hit.collider.gameObject.layer;
+		if (CheckMask (_hitLayer, boundaryMask.value) > 0) {
+			//벽과 충돌(X)....> 파티클...
+			Debug.Log ("경계와 충돌...");
+		} else if (CheckMask (_hitLayer, enemyMask.value) > 0) {
+			Debug.Log ("적과 충돌...");
+		} else if (CheckMask (_hitLayer, AsteroidMask.value) > 0) {
+		}
+		OnDestroy ();
+	}
+	*/
 }

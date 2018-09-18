@@ -13,13 +13,23 @@ public class PlayerController : MonoBehaviour {
 	//발사...
 	public float NEXT_TIME = 0.25f;
 	float nextTime;
-	public Transform prefabBullet;
+	//public Transform prefabBullet;
 	public Transform spawnPoint;
 
 	void Start(){
 		trans = transform;
 		y = trans.position.y;
 		health = HEALTH_MAX;
+
+		int[] ii = { 1, 2, 3 };
+		Utility.ShufflArray<int> (ii);
+		for (int i = 0, iMax = ii.Length; i < iMax; i++)
+			Debug.Log (ii [i]);
+
+		Vector3[] ff = { Vector3.one, Vector3.one*2, Vector3.one*3 };
+		Utility.ShufflArray<Vector3> (ff);
+		for (int i = 0, iMax = ff.Length; i < iMax; i++)
+			Debug.Log (ff [i]);
 	}
 
 	void Update(){
@@ -39,19 +49,23 @@ public class PlayerController : MonoBehaviour {
 		//발사하기.
 		if (Time.time > nextTime) {
 			nextTime = Time.time + NEXT_TIME;
-			Transform _t = Instantiate (prefabBullet, spawnPoint.position, spawnPoint.rotation) as Transform;
-			//_t.SetParent (trans);
+			//Transform _t = Instantiate (prefabBullet, spawnPoint.position, spawnPoint.rotation) as Transform;
+			PoolManager.ins.Instantiate("PlayerBullet", 
+				spawnPoint.position, 
+				spawnPoint.rotation);
 		}
 
 		//틸트 회전.
 		trans.rotation = Quaternion.Euler(0, 0, -h * tilt);
+
+		GetComponent<Rigidbody> ().velocity = Vector3.forward * moveSpeed;
 
 	}
 
 	public float HEALTH_MAX  = 10f;
 	float health;
 	bool bDie = false;
-	public GameObject prefabExplosion;
+	//public GameObject prefabExplosion;
 	public void HitDamage(float _damage, Vector3 _hitPoint){
 		health -= _damage;
 		//Debug.Log ("#### hit particle, sound");
@@ -64,7 +78,7 @@ public class PlayerController : MonoBehaviour {
 	void Die(){
 		bDie = true;
 		//Debug.Log("#### die -> Particle");
-		Instantiate(prefabExplosion, trans.position, trans.rotation);
+		PoolManager.ins.Instantiate("explosion_player", trans.position, trans.rotation);
 		OnDestroy();
 	}
 
