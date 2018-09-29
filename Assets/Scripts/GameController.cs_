@@ -4,19 +4,17 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {	
+	public static GameController ins;
 	public Transform[] spawnPoint;
 	public float spawnTimeBetween;
-	public int seed;
-	public bool bDebug;
-	//float spawnTime;
-	//Queue<Transform> shuffleIndex;
 
 	int score;
 	public Text scoreText;
 	public Text gameoverText;
 	public GameObject btnRestart;
-
-	int nameNum = 0;
+	void Awake(){
+		ins = this;
+	}
 
 	// Use this for initialization
 	void Start () {

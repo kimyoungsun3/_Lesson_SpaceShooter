@@ -52,10 +52,10 @@ public class PlayerBullet : MonoBehaviour {
 			if (_scp != null) {
 				_scp.HitDamage (1, hit.point);
 			}
-			PoolManager.ins.Instantiate("explosion_hit", hit.point, Quaternion.identity);
+			PoolManager.ins.Instantiate("explosion_hit2", hit.point, Quaternion.identity);
 		} else if (CheckMask (_hitLayer, asteroidMask.value) > 0) {
 			Debug.Log ("Bullet 행성과 충돌...");
-			PoolManager.ins.Instantiate("explosion_hit", hit.point, Quaternion.identity);
+			PoolManager.ins.Instantiate("explosion_hit2", hit.point, Quaternion.identity);
 			Asteriod _scp = hit.collider.GetComponent<Asteriod>();
 			if (_scp != null) {
 				_scp.HitDamage (1, hit.point);

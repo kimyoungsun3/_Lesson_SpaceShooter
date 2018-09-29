@@ -15,6 +15,10 @@ public class Asteriod : MonoBehaviour {
 		rb.angularVelocity = Random.insideUnitSphere * tumble;
 		health = HEALTH_MAX;
 	}
+
+	void OnEnable(){
+		bDie = false;
+	}
 	
 	// Update is called once per frame
 	void Update () {
