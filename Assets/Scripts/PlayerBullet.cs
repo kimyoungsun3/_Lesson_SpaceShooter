@@ -29,7 +29,7 @@ public class PlayerBullet : MonoBehaviour {
 		ray.origin 		= trans.position;
 		ray.direction 	= trans.forward;
 		distance = speed * Time.deltaTime + 0.1f;	//스킨값 추가...
-		Debug.DrawRay (ray.origin, ray.direction * distance, Color.blue);
+		//Debug.DrawRay (ray.origin, ray.direction * distance, Color.blue);
 		if(Physics.Raycast(ray, out hit, distance, mask, QueryTriggerInteraction.Collide)){
 			HitCheck ();
 			return;
@@ -45,18 +45,12 @@ public class PlayerBullet : MonoBehaviour {
 		int _hitLayer = hit.collider.gameObject.layer;
 		if (CheckMask (_hitLayer, boundaryMask.value) > 0) {
 			//벽과 충돌(X)....> 파티클...
-			Debug.Log ("Bullet 경계와 충돌...");
-		} else if (CheckMask (_hitLayer, enemyMask.value) > 0) {
-			Debug.Log ("Bullet 적과 충돌...");
-			Enemy _scp = hit.collider.GetComponent<Enemy>();
-			if (_scp != null) {
-				_scp.HitDamage (1, hit.point);
-			}
+			//Debug.Log ("Bullet 경계와 충돌...");
+		} else if (CheckMask (_hitLayer, enemyMask.value) > 0 
+			|| CheckMask (_hitLayer, asteroidMask.value) > 0) {
+			//Debug.Log ("Bullet 행성과 충돌...");
 			PoolManager.ins.Instantiate("explosion_hit2", hit.point, Quaternion.identity);
-		} else if (CheckMask (_hitLayer, asteroidMask.value) > 0) {
-			Debug.Log ("Bullet 행성과 충돌...");
-			PoolManager.ins.Instantiate("explosion_hit2", hit.point, Quaternion.identity);
-			Asteriod _scp = hit.collider.GetComponent<Asteriod>();
+			EnemyMaster _scp = hit.collider.GetComponent<EnemyMaster>();
 			if (_scp != null) {
 				_scp.HitDamage (1, hit.point);
 			}

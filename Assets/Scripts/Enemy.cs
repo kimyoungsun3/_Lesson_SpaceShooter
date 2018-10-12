@@ -2,26 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour {
-	Rigidbody rb;
-	Transform trans;
-	public float tumble = 10f;
-	public float moveSpeed = 3f;
-
-	void Start () {
-		trans = transform;
-		rb = GetComponent<Rigidbody> ();
-
-		//임의의 방향으로 회전...
-		//rb.angularVelocity = Random.insideUnitSphere * tumble;
-		health = HEALTH_MAX;
-	}
-
-	void Update () {
-		//아래 방향으로 이동하기..(회전축이 변화해서 World공간을 기준으로 이동)
-		trans.Translate(Vector3.back * moveSpeed * Time.deltaTime, Space.World);		
-	}
-
+public class Enemy : EnemyMaster {
+	
+	//X
 	void OnTriggerEnter(Collider _col){		
 		if (_col.CompareTag ("Boundary")) {
 			//아래 경계라인에 충돌..
@@ -30,7 +13,7 @@ public class Enemy : MonoBehaviour {
 			//플레이어와 충돌..
 			PoolManager.ins.Instantiate("explosion_asteroid", trans.position, trans.rotation);
 
-			PlayerController _scpPlayer = _col.GetComponent<PlayerController> ();
+			PlayerController _scpPlayer = _col.transform.parent.GetComponent<PlayerController> ();
 			if (_scpPlayer != null) {
 				_scpPlayer.HitDamage (1, trans.position);
 			}
@@ -38,25 +21,10 @@ public class Enemy : MonoBehaviour {
 		}
 	}
 
-	public float HEALTH_MAX  = 1f;
-	float health;
-	bool bDie = false;
-	public void HitDamage(float _damage, Vector3 _hitPoint){
-
-		health -= _damage;
-		PoolManager.ins.Instantiate("explosion_hit", _hitPoint, Quaternion.identity);
-		if (!bDie && health <= 0) {
-			Die ();
-		}
+	protected override void Die(){
+		SpawerManager.ins.SetScore (10);
+		base.Die ();
 	}
 
-	void Die(){
-		PoolManager.ins.Instantiate("explosion_asteroid", trans.position, trans.rotation);
-		bDie = true;
-		OnDestroy();
-	}
 
-	void OnDestroy(){
-		gameObject.SetActive (false);
-	}
 }

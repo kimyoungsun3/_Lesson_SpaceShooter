@@ -7,86 +7,168 @@ using Random = UnityEngine.Random;
 public class SoundManager : MonoBehaviour {
 	[Serializable]
 	public class SoundData{
-		public AudioClip clip;
-		public int channel = 1;
-		public string name; 
+		public string name;  
+		[HideInInspector] public int hashID;
+		public AudioClip[] clips;
+		public AudioSource[] sources;
+		public bool pitchRandom = true;
+		[HideInInspector] public int index, indexBefore;
+
+		public void Init(){
+			hashID = name.GetHashCode();
+		}
+
+		public void Play(bool _bLoop, float _pitch, int _clipIdx = -1){
+			//Debug.Log (name + ", " + index);
+			if (_clipIdx == -1) {
+				_clipIdx = Random.Range (0, clips.Length);
+			}
+			//Debug.Log ("play:" + _clipIdx + ":" + index);
+
+			sources [index].Stop ();
+			sources [index].pitch 	= _pitch;
+			sources [index].loop 	= _bLoop;
+			sources [index].clip 	= clips[_clipIdx];
+			sources [index].Play ();
+
+			indexBefore = index;
+			index = ( index + 1 ) % sources.Length; 
+		}
+
+		public void Stop(){
+			sources [indexBefore].Stop ();
+		}
+
+		public void AllStop(){
+			for (int i = 0, iMax = sources.Length; i < iMax; i++) {
+				sources [i].Stop ();
+			}
+		}			
 	}
 
-	private static SoundManager ins_;
-	public static SoundManager ins{
-		get{
-			//Debug.Log ("SoundManager ins create");
-			return ins_;
-		}
-		set{ ins_ = value; }
-	}
+	public static SoundManager ins;
 	public float pitchLower = 0.95f;
 	public float pitchUp = 1.05f;
-	public AudioSource[] music;
-	public SoundData[] soundData;
-	private SoundData beforeData;
-	bool bInit = false;
-	int nameNum = 0;
+	//public AudioSource[] music;
+	public List<SoundData> soundDataList = new List<SoundData> ();
+	SoundData beforeData, currentData;
+	//bool bInit = false;
+	//int nameNum = 0;
+	//int channel;
 
 	void Awake(){
-		gameObject.name += ++nameNum;
-		//Debug.Log ("SoundManager Awake ins_[" + ins_ + "]" +nameNum);
-		if (ins == null) {
-			//Debug.Log ("first create");
-			ins = this;
-		} else if (ins_ != this) {
-			//전것존재 -> 또다른것 -> 삭제. 이후는 실행안됨(Start, OnEnable)...
-			//Debug.Log ("또생성? 음... 삭제(지금것)");
-			Destroy (gameObject);
-			return;
-		}
-		DontDestroyOnLoad (gameObject);
-
+		//if (ins == null) {
+		//	ins = this;
+		//} else if (ins != this) {
+		//	//전것존재 -> 또다른것 -> 삭제. 이후는 실행안됨(Start, OnEnable)...
+		//	//Debug.Log ("또생성? 음... 삭제(지금것)");
+		//	Destroy (gameObject);
+		//	return;
+		//}
+		//DontDestroyOnLoad (gameObject);
+		ins = this;
 		if (!bInit) {
-			bInit = true;
-			music [0].loop = true;
+			Init ();
 		}
 	}
 
-	public void Play(string _name){
-		//Debug.Log ("SoundManager Play");
-		if (beforeData != null && beforeData.name.Equals (_name)) {
+	//void Start(){
+	//}
+
+	bool bInit = false;
+	public void Init(){
+		if (bInit)
+			return;
+
+		for (int i = 0, iMax = soundDataList.Count; i < iMax; i++) {
+			soundDataList[i].Init ();
+			//Debug.Log (i + ":" + soundDataList [i].name +":"+ soundDataList [i].hashID);
+		}
+		bInit = true;
+	}
+
+	//Play("xxx", true)   -> xxx 1번 loop
+	//Play("xxx", false)  -> xxx 1번 one shoot
+	//Play("xxx", -1) -> xxx 1번 one shoot
+	public void Play(string  _name, bool _bLoop, int _clipIdx = -1){
+		//Debug.Log ("name:" + _name + " loop:" + _bLoop);
+		int _hashID = _name.GetHashCode();
+		Play (_hashID, _bLoop, _clipIdx);
+	}
+
+	public void Play(int _hashID){
+		Play (_hashID, false);
+	}
+
+	public void Play(int _hashID, bool _bLoop, int _clipIdx = -1){
+		//Debug.Log ("SoundManager Play _bLoop:" + _bLoop);
+		bool _rtn = false;
+		if (beforeData != null && beforeData.hashID == _hashID) {
 			//before data reuse.
-			beforeData = beforeData;
+			currentData = beforeData;
 		}else{
 			//find
-			beforeData = FindSound (_name);
+			currentData = FindSound (_hashID, string.Empty);
 		}
+		beforeData = currentData;
 
-		if (beforeData != null) {
-			music [beforeData.channel].pitch = Random.Range (pitchLower, pitchUp);
-			music [beforeData.channel].Stop ();
-			music [beforeData.channel].clip = beforeData.clip;
-			music [beforeData.channel].Play ();
+		if (currentData != null) {
+			currentData.Play (_bLoop, Random.Range (pitchLower, pitchUp), _clipIdx);
 		}
 	}
 
-	public void Stop(int _channel){
-		music [_channel].Stop ();
+	public void Stop(string  _name){
+		//Debug.Log ("SoundManager Stop _name:" + _name);
+		int _hashID = _name.GetHashCode();
+		SoundData _data = FindSound (_hashID, _name);
+		if (_data != null) {
+			_data.Stop ();
+		}
 	}
 
-	private SoundData FindSound(string _name){
-		List<SoundData> _temp = new List<SoundData> ();
-		_temp.Clear ();
+	SoundData FindSound(int _hashID, string _name){
+		//Debug.Log ("SoundManager FindSound _hashID:" + _hashID);
+		SoundData _data = null;
+		for (int i = 0, iMax = soundDataList.Count; i < iMax; i++) {
+			if (soundDataList [i].hashID == _hashID) {
+				_data = soundDataList[i];
+				break;
+			}
+		} 
 
-		for (int i = 0; i < soundData.Length; i++) {
-			if (_name.Equals (soundData [i].name)) {
-				_temp.Add (soundData[i]);
+		#if UNITY_EDITOR
+		if(_data == null){
+			Debug.LogError ("사운드 이름(hashID):" + _name + ":" + _hashID);
+		}
+		#endif
+
+		return _data;
+	}
+
+
+	#if UNITY_EDITOR
+	[Space]
+	[Header("Debug Data")]
+	public int debugIndex = 0; 
+	public int debugMusicIndex = -1;
+	public bool bDebugPlay = false;
+	public string debugName;
+	void Update(){
+		if (bDebugPlay) {
+			if (debugIndex >= 0 && debugIndex < soundDataList.Count) {
+				SoundData _s = soundDataList [debugIndex];
+				bDebugPlay = false;
+				if (debugMusicIndex < -1) {
+					debugMusicIndex = -1;
+				} else if (debugMusicIndex >= _s.clips.Length) {
+					debugMusicIndex = _s.clips.Length - 1;
+				}
+				if(SoundManager.ins != null)SoundManager.ins.Play (_s.name, false, debugMusicIndex);
+				debugName = _s.name + " "+debugMusicIndex+"번 사운드";
+			} else {
+				debugName = "rang out";
 			}
 		}
-
-		if (_temp.Count <= 0) {
-			Debug.LogError ("사운드 이름 없음:" + _name);
-			return null;
-		} else {
-			return _temp [Random.Range (0, _temp.Count)];
-		}
 	}
-
-
+	#endif
 }
