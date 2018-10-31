@@ -6,8 +6,7 @@ public class Asteriod : EnemyMaster {
 
 	protected override void Start(){
 		base.Start ();
-		rb.angularVelocity = Random.insideUnitSphere * tumble;
-		health = HEALTH_MAX;
+		rigidbody.angularVelocity = Random.insideUnitSphere * tumble;
 	}
 
 

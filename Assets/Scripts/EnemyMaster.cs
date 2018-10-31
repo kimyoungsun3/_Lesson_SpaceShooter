@@ -3,25 +3,29 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyMaster : MonoBehaviour {
-	protected Rigidbody rb;
 	protected Transform trans;
 	public float tumble = 10f;
 	public float moveSpeed = 3f;
+	protected Rigidbody rigidbody;
 
 	protected virtual void Start () {
 		trans 	= transform;
-		rb 		= GetComponent<Rigidbody> ();
+		health 	= HEALTH_MAX;
+		rigidbody = GetComponent<Rigidbody> ();
 	}
 
 	protected void OnEnable(){
 		bDie = false;
 		health = HEALTH_MAX;
+		if(rigidbody != null)
+			rigidbody.isKinematic = true;
 	}
 
 	// Update is called once per frame
 	void Update () {
 		//아래 방향으로 이동하기..(회전축이 변화해서 World공간을 기준으로 이동)
-		trans.Translate(Vector3.back * moveSpeed * Time.deltaTime, Space.World);		
+		//rigidbody.MovePosition(rigidbody.position + Vector3.back * moveSpeed * Time.deltaTime);		
+		trans.Translate(Vector3.back * moveSpeed * Time.deltaTime, Space.World);
 	}
 
 	public float HEALTH_MAX  = 1f;

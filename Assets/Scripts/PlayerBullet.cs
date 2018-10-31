@@ -24,13 +24,24 @@ public class PlayerBullet : MonoBehaviour {
 		spawnTime = Time.time + SPAWN_ALIVE_TIME;
 	}
 
+	public float radius = 0.06f;
+	#if UNITY_EDITOR
+	void OnDrawGizmos(){
+		Gizmos.color = Color.green;
+		Gizmos.DrawWireSphere (trans.position, radius);
+		Gizmos.DrawWireSphere (trans.position + trans.forward * distance, radius);
+		Gizmos.DrawRay (trans.position, trans.forward * distance);
+	}
+	#endif
+
 	// Update is called once per frame
 	void Update () {
 		ray.origin 		= trans.position;
 		ray.direction 	= trans.forward;
-		distance = speed * Time.deltaTime + 0.1f;	//스킨값 추가...
+		distance = speed * Time.deltaTime + 0.2f;	//스킨값 추가...
 		//Debug.DrawRay (ray.origin, ray.direction * distance, Color.blue);
-		if(Physics.Raycast(ray, out hit, distance, mask, QueryTriggerInteraction.Collide)){
+		//if(Physics.Raycast(ray, out hit, distance, mask, QueryTriggerInteraction.Collide)){
+		if(Physics.SphereCast(ray, radius, out hit, distance, mask, QueryTriggerInteraction.Collide)){
 			HitCheck ();
 			return;
 		}
